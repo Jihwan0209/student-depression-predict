@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "train.py (Python 3.13)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/python/train.py",
+            "cwd": "${workspaceFolder}",
+            "python": "C:\\Users\\kimdo\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+            "console": "integratedTerminal"
+        }
+    ]
+}
