@@ -2,6 +2,8 @@
 import os
 import joblib
 import pandas as pd
+import json
+import math
 
 # 요청 JSON 키(camelCase) -> 학습 데이터셋 컬럼명
 KEY_TO_COLUMN = {
@@ -26,6 +28,9 @@ class PredictService:
     def __init__(self):
         saved = joblib.load(MODEL_PATH)
         self.model = saved['model']
+        # 윈도우 access violation 방지 : 모델 트리를 JSON 으로 읽어 파이썬으로 직접 계산
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'model.json'), encoding='utf-8') as fp:
+            self.trees = json.load(fp)['tree_info']
         self.f1 = round(float(saved['f1_score']), 4)
         self.num_cols = saved['num_cols']
         self.cat_cols = saved['cat_cols']
@@ -67,9 +72,31 @@ class PredictService:
             df[col] = pd.Categorical(df[col], categories=self.categories[col])
         return df
 
+    # LightGBM 트리 직접 계산 ( 모든 트리 점수 합 -> 시그모이드 = 확률 )
+    def tree_predict(self, df):
+        values = []
+        for col in self.num_cols + self.cat_cols:
+            if col in self.cat_cols:
+                values.append(float(df[col].cat.codes[0]))
+            else:
+                values.append(float(df[col].iloc[0]))
+        score = 0.0
+        for tree in self.trees:
+            node = tree['tree_structure']
+            while 'leaf_value' not in node:
+                v = values[node['split_feature']]
+                if node['decision_type'] == '==':
+                    cats = [int(c) for c in str(node['threshold']).split('||')]
+                    left = v >= 0 and int(v) in cats
+                else:
+                    left = v <= node['threshold']
+                node = node['left_child'] if left else node['right_child']
+            score += node['leaf_value']
+        return 1 / (1 + math.exp(-score))
+
     # 예측 : 확률 계산 후 결과 dict 반환
     def predict_df(self, df):
-        probability = float(self.model.predict_proba(df)[0][1])  # 1(우울)일 확률
+        probability = self.tree_predict(df)  # 1(우울)일 확률
         prediction = 1 if probability >= 0.5 else 0
         return {
             'prediction': prediction,
