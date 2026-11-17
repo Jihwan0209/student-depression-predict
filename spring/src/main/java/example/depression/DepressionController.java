@@ -1,7 +1,5 @@
 package example.depression;
 
-import java.util.Map;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +25,7 @@ public class DepressionController {
 
     // 2. 예측 요청 : 입력값을 FastAPI 로 넘김 ( 결과는 위 구독으로 흘러감 )
     @PostMapping("/predict")
-    public void predict( @RequestBody Map<String,Object> data ){
-        depressionService.predict( data );
+    public void predict( @RequestBody DepressionDto depressionDto ){
+        depressionService.predict( depressionDto );
     }
 }

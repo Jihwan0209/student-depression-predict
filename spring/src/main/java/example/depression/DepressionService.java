@@ -1,7 +1,6 @@
 package example.depression;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.http.MediaType;
@@ -37,11 +36,11 @@ public class DepressionService {
     }
 
     // 예측 : FastAPI 스트리밍 호출 -> 오는 데이터를 한 건씩 리액트로 전달
-    public void predict( Map<String,Object> data ){
+    public void predict( DepressionDto depressionDto ){
         webClient.post()
                 .uri( fastApiUrl )
                 .contentType( MediaType.APPLICATION_JSON )
-                .bodyValue( data )
+                .bodyValue( depressionDto )
                 .retrieve()
                 .bodyToFlux( String.class )                  // 한 건씩 받기 ( bodyToMono 는 한 번에 1건 )
                 .subscribe(
