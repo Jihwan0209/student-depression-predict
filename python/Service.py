@@ -16,6 +16,10 @@ KEY_TO_COLUMN = {
     'financialStress': 'Financial Stress',
 }
 
+# 학점 환산 : 요청은 한국식 4.5 만점, 학습 데이터 CGPA 는 10 만점
+GPA_MAX = 4.5
+CGPA_MAX = 10.0
+
 # 모델 파일 경로 : 이 파일(python/Service.py) 기준 한 단계 위 폴더의 depression_model.pkl
 # -> 어느 폴더에서 서버를 실행해도 같은 파일을 찾음
 MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'depression_model.pkl')
@@ -48,6 +52,9 @@ class PredictService:
                     float(data[key])
                 except (TypeError, ValueError):
                     return f'{key} 값은 숫자여야 합니다'
+        # 2-1. 학점은 0 ~ 4.5 범위인지 확인
+        if 'gpa' in self.keys and not 0 <= float(data['gpa']) <= GPA_MAX:
+            return f'gpa 값은 0 ~ {GPA_MAX} 사이여야 합니다'
         # 3. 범주형은 학습 때 허용한 값인지 확인
         for key, col in self.keys.items():
             if col in self.cat_cols and data[key] not in self.categories[col]:
@@ -58,6 +65,9 @@ class PredictService:
     def to_dataframe(self, data):
         # 1. 키 이름을 데이터셋 컬럼명으로 변경
         row = {col: data[key] for key, col in self.keys.items()}
+        # 1-1. 학점 환산 : 4.5 만점 -> 10 만점 (예: 4.0 -> 8.89)
+        if 'CGPA' in row:
+            row['CGPA'] = float(row['CGPA']) / GPA_MAX * CGPA_MAX
         # 2. 한 줄짜리 df 생성, 컬럼 순서를 학습 때와 동일하게 (num_cols + cat_cols)
         df = pd.DataFrame([row])[self.num_cols + self.cat_cols]
         # 3. 수치형은 float, 범주형은 학습 때와 같은 범주 목록으로 고정

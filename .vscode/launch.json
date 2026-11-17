@@ -6,6 +6,13 @@
             "name": "AppStart",
             "request": "launch",
             "mainClass": "example.depression.AppStart",
+            "projectName": "depression-spring"
+        },
+        {
+            "type": "java",
+            "name": "AppStart",
+            "request": "launch",
+            "mainClass": "example.depression.AppStart",
             "projectName": "spring"
         },
         {

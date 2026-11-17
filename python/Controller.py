@@ -12,7 +12,7 @@ from Service import predict_service
 
 # 1) 일반 예측 (JSON 응답) - /docs 에서 테스트용
 # http://127.0.0.1:8000/api/predict
-# {"gender":"Male","age":22,"academicPressure":5,"gpa":7.5,"studySatisfaction":1,
+# {"gender":"Male","age":22,"academicPressure":5,"gpa":3.5,"studySatisfaction":1,
 #  "sleepDuration":"Less than 5 hours","dietaryHabits":"Unhealthy",
 #  "workStudyHours":10,"financialStress":5}
 @router.post("/predict")
