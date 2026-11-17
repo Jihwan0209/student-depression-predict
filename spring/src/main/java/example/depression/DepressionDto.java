@@ -13,6 +13,7 @@ public class DepressionDto {
     private Double gpa;               // 학점 0~4.5
     private Integer studySatisfaction;// 학업 만족도 0~5
     private String sleepDuration;     // 수면 시간 구간
+    private String dietaryHabits;     // 식습관 : Unhealthy / Moderate / Healthy
     private Double workStudyHours;    // 하루 공부/일 시간
     private Integer financialStress;  // 경제적 스트레스 1~5
 }
