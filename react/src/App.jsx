@@ -5,6 +5,8 @@ const BASE = 'http://localhost:8080/api/depression'
 const STEPS = ['요청 데이터 수신', '입력값 검증 및 전처리', 'LightGBM 모델 예측', '예측 완료']
 
 export default function App() {
+  // 접속자 구분번호 ( 요청한 화면에만 결과가 오게 함 )
+  const [id] = useState(() => Math.random().toString(36).slice(2))
   // 입력값
   const [form, setForm] = useState({
     gender: 'Male', age: 22, academicPressure: 3, gpa: 7.5, studySatisfaction: 3,
@@ -17,7 +19,7 @@ export default function App() {
 
   // 1. 화면이 열리면 SSE 구독 ( 스프링이 보내는 predict 이벤트 수신 )
   useEffect(() => {
-    const es = new EventSource(`${BASE}/subscribe`)
+    const es = new EventSource(`${BASE}/subscribe?id=${id}`)
     es.addEventListener('predict', (e) => {
       const data = JSON.parse(e.data)
       // 스프링은 이벤트 이름이 전부 predict 이므로 JSON 안의 값으로 구분
@@ -37,7 +39,7 @@ export default function App() {
   // 2. 예측 요청 ( axios POST , 결과는 위 SSE 로 도착 )
   const predict = async () => {
     setProgress(null); setResult(null); setError(null); setLoading(true)
-    try { await axios.post(`${BASE}/predict`, form) }
+    try { await axios.post(`${BASE}/predict?id=${id}`, form) }
     catch (e) { setError({ message: '스프링 서버 연결 실패' }); setLoading(false) }
   }
 
